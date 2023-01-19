@@ -24,7 +24,7 @@ make backup
 
 * Restore
 ```
-kubectl config set-context --current --namespace=
+kubectl config set-context --current --namespace=dev
 make restore
 ```
 * Cleanup
