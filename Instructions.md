@@ -34,7 +34,7 @@ make cleanup
 
 
 * Improvements
-  * Change how password is generated
+  * Do not use admin postgres user/password for backend service
   * Use gzip or other compression mechanism for backups
   * Fix prompt errors when running make restore/backup commands
   * Use HTTP healthcheck from services

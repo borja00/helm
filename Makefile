@@ -15,12 +15,13 @@ MK_ADDON_INGRESS =$(shell minikube addons enable ingress > /dev/null)
 
 DUMP_FILE := dump.tar
 
-K8_CREATE_DUMP = $(shell kubectl exec -it app-postgresql-0 -- bash -c 'export PGPASSWORD="$$POSTGRES_PASSWORD" && pg_dump -U "$$POSTGRES_USER" -F t "$$POSTGRES_DB"  > /bitnami/postgresql/$(DUMP_FILE)')
+
+K8_CREATE_DUMP = $(shell kubectl exec -it app-postgresql-0 -- bash -c 'export PGPASSWORD="$$POSTGRES_PASSWORD" && pg_dump -U postgres -F t "$$POSTGRES_DB"  > /bitnami/postgresql/$(DUMP_FILE)')
 K8_DOWNLOAD_DUMP = $(shell kubectl cp app-postgresql-0:/bitnami/postgresql/$(DUMP_FILE) $(DUMP_FILE))
 
 K8_UPLOAD_DUMP = $(shell kubectl cp $(DUMP_FILE) app-postgresql-0:/bitnami/postgresql/$(DUMP_FILE))
 
-K8_RESTORE_DUMP = $(shell kubectl exec -it app-postgresql-0 -- bash -c 'export PGPASSWORD="$$POSTGRES_PASSWORD" && pg_restore -U "$$POSTGRES_USER" -Ft -C -d "$$POSTGRES_DB" < /bitnami/postgresql/$(DUMP_FILE)')
+K8_RESTORE_DUMP = $(shell kubectl exec -it app-postgresql-0 -- bash -c 'export PGPASSWORD="$$POSTGRES_PASSWORD" && pg_restore -U postgres -Ft -C -d "$$POSTGRES_DB" < /bitnami/postgresql/$(DUMP_FILE)')
 
 
 help:

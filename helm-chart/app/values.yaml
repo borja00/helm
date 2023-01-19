@@ -36,7 +36,12 @@ backend:
   env:
     # non sensitive variables
     normal:
-      DATABASE_URL: postgresql://application:application@app-postgresql:5432/application
+      DATABASE_URL: postgresql://postgres:$(DB_POSTGRES_PASSWORD)@app-postgresql:5432/application
+    secrets:
+    - name: app-postgresql
+      prefix: DB_
+      keys:
+        - postgres-password
 
   service:
     type: NodePort
@@ -57,8 +62,5 @@ backend:
 
 postgresql:
   enabled: true
-
   auth:
     database: application
-    password: application
-    username: application
