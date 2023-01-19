@@ -38,3 +38,4 @@ make cleanup
   * Use gzip or other compression mechanism for backups
   * Fix prompt errors when running make restore/backup commands
   * Use HTTP healthcheck from services
+  * Add pipeline and use OCI registry for project
