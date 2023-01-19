@@ -13,18 +13,15 @@ MK_CREATE = $(shell minikube start \
 MK_DELETE = $(shell minikube delete 1> /dev/null)
 MK_ADDON_INGRESS =$(shell minikube addons enable ingress > /dev/null)
 
-DOCKER_CREATE_DUMP = $(shell docker exec -it \
-	$(DATABASE_CONTAINER) sh -c 'mysqldump \
-	-uroot -p"$$MARIADB_ROOT_PASSWORD" application \
-	> /root/dump.sql')
-DOCKER_DOWNLOAD_DUMP = $(shell docker cp \
-	$(DATABASE_CONTAINER):/root/dump.sql .)
-DOCKER_UPLOAD_DUMP = $(shell docker cp dump.sql \
-	$(DATABASE_CONTAINER):/root/dump.sql)
-DOCKER_RESTORE_DUMP = $(shell docker exec -it \
-	$(DATABASE_CONTAINER) sh -c 'mysqldump \
-	-uroot -p"$$MARIADB_ROOT_PASSWORD" application \
-	< /root/dump.sql' 1>/dev/null)
+DUMP_FILE := dump.tar
+
+K8_CREATE_DUMP = $(shell kubectl exec -it app-postgresql-0 -- bash -c 'export PGPASSWORD="$$POSTGRES_PASSWORD" && pg_dump -U "$$POSTGRES_USER" -F t "$$POSTGRES_DB"  > /bitnami/postgresql/$(DUMP_FILE)')
+K8_DOWNLOAD_DUMP = $(shell kubectl cp app-postgresql-0:/bitnami/postgresql/$(DUMP_FILE) $(DUMP_FILE))
+
+K8_UPLOAD_DUMP = $(shell kubectl cp $(DUMP_FILE) app-postgresql-0:/bitnami/postgresql/$(DUMP_FILE))
+
+K8_RESTORE_DUMP = $(shell kubectl exec -it app-postgresql-0 -- bash -c 'export PGPASSWORD="$$POSTGRES_PASSWORD" && pg_restore -U "$$POSTGRES_USER" -Ft -C -d "$$POSTGRES_DB" < /bitnami/postgresql/$(DUMP_FILE)')
+
 
 help:
 	@echo "Usage: make COMMAND [VARIABLE=value ...]"
@@ -44,8 +41,8 @@ help:
 
 backup:
 	$(info Creating database backup.)
-	@echo $(DOCKER_CREATE_DUMP)
-	@echo $(DOCKER_DOWNLOAD_DUMP)
+	$(K8_CREATE_DUMP)
+	echo $(K8_DOWNLOAD_DUMP)
 	$(info Database backup finished.)
 
 cleanup:
@@ -72,6 +69,6 @@ endif
 
 restore:
 	$(info Restoring database backup.)
-	@echo $(DOCKER_UPLOAD_DUMP)
-	@echo $(DOCKER_RESTORE_DUMP)
+	@echo $(K8_UPLOAD_DUMP)
+	@echo $(K8_RESTORE_DUMP)
 	$(info Database backup restored.)

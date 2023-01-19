@@ -1,0 +1,64 @@
+env: dev
+
+frontend:
+  image:
+    repository: tuergeist/minikube-frontend
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+  
+  tty: true
+
+  env:
+    # non sensitive variables
+    normal:
+      REACT_APP_BACKEND_API_BASE_URL: ""
+
+  service:
+    type: NodePort
+    port: 3000
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    hosts:
+      - paths:
+          - path: /
+
+backend:
+  replicaCount: 1
+  image:
+    repository: tuergeist/minikube-backend
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+  env:
+    # non sensitive variables
+    normal:
+      DATABASE_URL: postgresql://application:application@app-postgresql:5432/application
+
+  service:
+    type: NodePort
+    port: 8000      
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      # nginx.ingress.kubernetes.io/rewrite-target: /$2
+      # name: rewrite
+    hosts:
+      - paths:
+          # - path: /todo(/|$)(.*)
+          - path: /todo
+
+
+
+postgresql:
+  enabled: true
+
+  auth:
+    database: application
+    password: application
+    username: application
