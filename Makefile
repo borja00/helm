@@ -42,8 +42,8 @@ help:
 
 backup:
 	$(info Creating database backup.)
-	$(K8_CREATE_DUMP)
-	echo $(K8_DOWNLOAD_DUMP)
+	@echo $(K8_CREATE_DUMP)
+	@echo $(K8_DOWNLOAD_DUMP)
 	$(info Database backup finished.)
 
 cleanup:
